@@ -88,8 +88,16 @@ def clear_model_memory_caches
   ActiveGraph::Node::Labels.clear_wrapped_models
 end
 
+def delete_db_query
+  if ActiveGraph::DBAttribute.db_delete_all_without_detach? then
+    'MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r'
+  else
+    'MATCH (n) DETACH DELETE n'
+  end
+end
+
 def delete_db(executor = ActiveGraph::Base)
-  executor.query('MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r')
+  executor.query(delete_db_query)
 end
 
 def delete_schema
