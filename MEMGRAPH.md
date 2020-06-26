@@ -61,4 +61,4 @@ in comments, suggestions.
 
 [1]: https://memgraph.com/download
 [2]: https://github.com/neo4j-drivers/seabolt
-[2]: https://github.com/dressipi/seabolt
+[3]: https://github.com/dressipi/seabolt
