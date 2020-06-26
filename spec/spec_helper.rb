@@ -89,10 +89,11 @@ def clear_model_memory_caches
 end
 
 def delete_db_query
-  if ActiveGraph::DBAttribute.db_delete_all_without_detach? then
-    'MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r'
-  else
+  case ActiveGraph::DBType.name
+  when :memgraph
     'MATCH (n) DETACH DELETE n'
+  when :neo4j
+    'MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r'
   end
 end
 

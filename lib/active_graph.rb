@@ -3,7 +3,7 @@ require 'active_graph/version'
 
 require 'active_graph/core'
 require 'active_graph/core/query_ext' # From this gem
-require 'active_graph/db_attribute'
+require 'active_graph/db_type'
 
 require 'active_support/core_ext/module/attribute_accessors_per_thread'
 require 'active_graph/transactions'

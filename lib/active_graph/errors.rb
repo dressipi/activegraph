@@ -28,6 +28,8 @@ module ActiveGraph
   class DangerousAttributeError < ScriptError; end
   class UnknownAttributeError < NoMethodError; end
 
+  class UnknownDBTypeError < ArgumentError ; end
+
   class MigrationError < Error; end
   class IrreversibleMigration < MigrationError; end
   class UnknownMigrationVersionError < MigrationError; end
