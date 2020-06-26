@@ -1,6 +1,7 @@
-# methods describe the behaviour (attributes) of graph DBs,
-# this so that we can avoid littering the code with per-db
-# conditionals
+# this allows us to put switches in the code depending on
+# the Graph DB type (just neo4j and memgraph), that's a
+# pretty cheesy thing to do, see MEMGRAPH.md in the repo
+# root for a discussion
 
 module ActiveGraph::DBType
   extend self
