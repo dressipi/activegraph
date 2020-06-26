@@ -44,11 +44,10 @@ the appropriate subclass by type.  But I'm open to ideas on this.
 Running
 -------
 
-You'd need to [install Memgraph][1] of course, and then install the
-[Seabolt driver][2].  There is a small bug in the master branch which
-prevents it working with Memgraph and the `none` authorisation scheme,
-[fixed here][3] (PR issued), so clone the latter and follow the build
-instruction.
+You'd need to [install Memgraph][1] and the [Seabolt driver][2].  There is
+a small bug in the master branch which prevents it working with Memgraph
+and the `none` authorisation scheme, [fixed here][3] (PR issued), so clone
+the latter and follow the build instruction.
 
 
 Status
@@ -56,8 +55,6 @@ Status
 
 This is paused, pending other commitments.  I'd be most interested
 in comments, suggestions.
-
-
 
 [1]: https://memgraph.com/download
 [2]: https://github.com/neo4j-drivers/seabolt
