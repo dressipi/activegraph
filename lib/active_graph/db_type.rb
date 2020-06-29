@@ -6,12 +6,8 @@
 module ActiveGraph::DBType
   extend self
 
-  def neo4j?
-    name == :neo4j
-  end
-
-  def memgraph?
-    name == :memgraph
+  def self.included(cls)
+    cls.include(module_for(cls))
   end
 
   def module_for(scope)

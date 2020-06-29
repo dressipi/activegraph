@@ -4,7 +4,7 @@ require_relative 'label/memgraph'
 module ActiveGraph
   module Core
     class Label
-      include ActiveGraph::DBType.module_for(self)
+      include ActiveGraph::DBType
 
       attr_reader :name
 
