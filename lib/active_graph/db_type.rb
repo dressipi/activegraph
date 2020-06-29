@@ -14,6 +14,10 @@ module ActiveGraph::DBType
     name == :memgraph
   end
 
+  def module_for(scope)
+    scope.const_get(module_name)
+  end
+
   def module_name
     case name
     when :neo4j

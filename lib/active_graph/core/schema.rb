@@ -4,7 +4,7 @@ require_relative 'schema/memgraph'
 module ActiveGraph
   module Core
     module Schema
-      include const_get ActiveGraph::DBType.module_name
+      include ActiveGraph::DBType.module_for(self)
 
       def version
         result = query('CALL dbms.components()', {}, skip_instrumentation: true)

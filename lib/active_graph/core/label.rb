@@ -4,9 +4,9 @@ require_relative 'label/memgraph'
 module ActiveGraph
   module Core
     class Label
-      attr_reader :name
+      include ActiveGraph::DBType.module_for(self)
 
-      include const_get ActiveGraph::DBType.module_name
+      attr_reader :name
 
       def initialize(name)
         @name = name
