@@ -6,12 +6,7 @@ module ActiveGraph
     class Label
       attr_reader :name
 
-      case ActiveGraph::DBType.name
-      when :neo4j
-        include Neo4j
-      when :memgraph
-        include Memgraph
-      end
+      include const_get ActiveGraph::DBType.module_name
 
       def initialize(name)
         @name = name

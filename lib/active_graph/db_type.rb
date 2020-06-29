@@ -14,6 +14,15 @@ module ActiveGraph::DBType
     name == :memgraph
   end
 
+  def module_name
+    case name
+    when :neo4j
+      'Neo4j'
+    when :memgraph
+      'Memgraph'
+    end
+  end
+
   def name
     if env_name = ENV['GRAPH_DB'] then
       env_name_sym = env_name.to_sym
