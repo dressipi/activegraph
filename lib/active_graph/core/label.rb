@@ -1,7 +1,17 @@
+require_relative 'label/neo4j'
+require_relative 'label/memgraph'
+
 module ActiveGraph
   module Core
     class Label
       attr_reader :name
+
+      case ActiveGraph::DBType.name
+      when :neo4j
+        include Neo4j
+      when :memgraph
+        include Memgraph
+      end
 
       def initialize(name)
         @name = name
@@ -113,41 +123,8 @@ module ActiveGraph
           end
         end
 
-        def drop_constraint_target(record)
-          case ActiveGraph::DBType.name
-          when :neo4j
-            if record.keys.include?(:name) then
-              "CONSTRAINT #{record[:name]}"
-            else
-              record[:description]
-            end
-          when :memgraph
-            case record['constraint type'.to_sym]
-            when 'unique'
-              format(
-                'CONSTRAINT ON (n:%s) ASSERT %s IS UNIQUE',
-                record[:label],
-                record[:properties]
-                  .split(/,/)
-                  .map { |property| "n.#{property}" }
-                  .join(', ')
-              )
-            else
-              raise RuntimeError, 'unknown type'
-            end
-          end
-        end
-
         def drop_constraint_cypher(record)
           "DROP #{drop_constraint_target(record)}"
-        end
-
-        def list_constraints_cypher
-          if ActiveGraph::DBType.neo4j? then
-            'CALL db.constraints'
-          else
-            'SHOW CONSTRAINT INFO'
-          end
         end
 
         def drop_constraints

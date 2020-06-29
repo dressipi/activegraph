@@ -1,36 +1,22 @@
+require_relative 'schema/neo4j'
+require_relative 'schema/memgraph'
+
 module ActiveGraph
   module Core
     module Schema
+
+      case ActiveGraph::DBType.name
+      when :neo4j
+        include Neo4j
+      when :memgraph
+        include Memgraph
+      end
+
       def version
         result = query('CALL dbms.components()', {}, skip_instrumentation: true)
 
         # BTW: community / enterprise could be retrieved via `result.first.edition`
         result.first[:versions][0]
-      end
-
-      def indexes
-        case ActiveGraph::DBType.name
-        when :neo4j
-          result = list_indexes_query
-          result.map do |row|
-            {
-              type: row[:type].to_sym,
-              label: label(result, row),
-              properties: properties(row),
-              state: row[:state].to_sym
-            }
-          end
-        when :memgraph
-          result = list_indexes_query
-          result.map do |row|
-            {
-              type: row[:'index type'].to_sym,
-              label: row[:label].to_sym,
-              properties: [row[:property].to_sym],
-              state: nil
-            }
-          end
-        end
       end
 
       def constraints
@@ -45,14 +31,6 @@ module ActiveGraph
       end
 
       private
-
-      def list_indexes_cypher
-        if ActiveGraph::DBType.neo4j? then
-          'CALL db.indexes()'
-        else
-          'SHOW INDEX INFO'
-        end
-      end
 
       def list_indexes_query
         query(list_indexes_cypher, {}, skip_instrumentation: true)
