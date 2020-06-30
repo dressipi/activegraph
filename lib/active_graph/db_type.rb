@@ -10,6 +10,14 @@ module ActiveGraph::DBType
     cls.include(module_for(cls))
   end
 
+  def neo4j?
+    name == :neo4j
+  end
+
+  def memgraph?
+    name == :memgraph
+  end
+
   def module_for(scope)
     scope.const_get(module_name)
   end
