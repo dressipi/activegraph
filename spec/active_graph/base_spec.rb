@@ -355,25 +355,46 @@ describe ActiveGraph::Base do
 
       it 'raises an error' do
         described_class.query("CREATE (:Album {uuid: 'dup'})").to_a
-        expect do
+        message_regexp =
+          case ActiveGraph::DBType.name
+          when :neo4j
+            /already exists with label/
+          when :memgraph
+            /Unable to commit due to unique constraint violation/
+          end
+        expect {
           described_class.query("CREATE (:Album {uuid: 'dup'})").to_a
-        end.to raise_error Neo4j::Driver::Exceptions::ClientException, /already exists with label/
+        }.to raise_error Neo4j::Driver::Exceptions::ClientException, message_regexp
       end
     end
 
     describe 'Invalid input error' do
       it 'raises an error' do
-        expect do
+        message_regexp =
+          case ActiveGraph::DBType.name
+          when :neo4j
+            /Invalid input 'A'/
+          when :memgraph
+            /mismatched input 'CRATE'/
+          end
+        expect {
           described_class.query("CRATE (:Album {uuid: 'dup'})").to_a
-        end.to raise_error(Neo4j::Driver::Exceptions::ClientException, /Invalid input 'A'/)
+        }.to raise_error Neo4j::Driver::Exceptions::ClientException, message_regexp
       end
     end
 
     describe 'Clause ordering error' do
       it 'raises an error' do
-        expect do
+        message_regexp =
+          case ActiveGraph::DBType.name
+          when :neo4j
+            /RETURN can only be used at the end of the query/
+          when :memgraph
+            /Update clause can't be used after RETURN/
+          end
+        expect {
           described_class.query("RETURN a CREATE (a:Album {uuid: 'dup'})").to_a
-        end.to raise_error Neo4j::Driver::Exceptions::ClientException, /RETURN can only be used at the end of the query/
+        }.to raise_error Neo4j::Driver::Exceptions::ClientException, message_regexp
       end
     end
   end
