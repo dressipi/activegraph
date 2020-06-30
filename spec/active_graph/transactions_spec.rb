@@ -11,6 +11,7 @@ describe ActiveGraph::Transactions do
 
   describe '.transaction' do
     context 'driver' do
+
       it 'executes read' do
         expect(ActiveGraph::Base.transaction { |tx| tx.run(read_query).single.first }).to eq 1
       end
@@ -21,6 +22,21 @@ describe ActiveGraph::Transactions do
     end
 
     context 'DSL' do
+
+      # this gives: ActiveGraph::DeprecatedSchemaDefinitionError:
+      # Some schema elements were defined by the model (which is no longer
+      # supported), but they do not exist in the database.  Run the following
+      # to create them if you haven't already:
+      # rake neo4j:generate_schema_migration[constraint,Student,uuid]
+      #
+      # That's odd, since stub_node_class('Student') causes the query
+      # CREATE CONSTRAINT ON (n:`Student`) ASSERT n.`uuid` IS UNIQUE
+      #
+      # Ah, that's validate_model_schema! in lib/active_graph/model_schema.rb
+      # and I think this is because Memgraph constraints aren't reported as
+      # indexes, in fact I think just implementing constraints would fix this
+      # ... so do that
+
       it 'executes read' do
         expect(ActiveGraph::Base.transaction { Student.count }).to eq 0
       end
@@ -89,7 +105,11 @@ describe ActiveGraph::Transactions do
       end.not_to raise_error
     end
 
+    # this fails due to version not be implemented, and this being
+    # specifically the Neo4j version
+
     it 'can mix DSL with pure driver ' do
+      skip 'version' if ActiveGraph::DBType.memgraph?
       expect do
         ActiveGraph::Base.session do |session|
           ActiveGraph::Base.write_transaction do |tx|
