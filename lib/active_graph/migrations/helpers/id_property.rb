@@ -22,9 +22,17 @@ module ActiveGraph
 
         protected
 
+        # 'NOT EXISTS(x)' not supported in Memgraph, 'x IS NULL' is equivalent
+
         def idless_count(label, id_property)
-          query.match(n: label).where("NOT EXISTS(n.#{id_property})").pluck('COUNT(n) AS ids').first
+          query
+            .match(n: label)
+            .where("n.#{id_property} IS NULL")
+            .pluck('COUNT(n) AS ids')
+            .first
         end
+
+        # FOREACH not supported by Memgraph, FIXME
 
         def id_batch_set(label, id_property, new_ids, count)
           ActiveGraph::Base.transaction do
