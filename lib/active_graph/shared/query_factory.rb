@@ -47,7 +47,8 @@ module ActiveGraph::Shared
 
     def match_query
       base_query
-        .match(match_string).where("ID(#{identifier}) = $#{identifier_id}")
+        .match(match_string)
+        .where("ID(#{identifier}) = $#{identifier_id}")
         .params(identifier_id.to_sym => graph_object.neo_id)
     end
 
@@ -67,10 +68,42 @@ module ActiveGraph::Shared
       "(#{identifier})"
     end
 
-    def create_query
-      return match_query if graph_object.persisted?
-      labels = graph_object.labels_for_create.map { |l| ":`#{l}`" }.join
-      base_query.create("(#{identifier}#{labels} $#{identifier}_params)").params(identifier_params => graph_object.props_for_create)
+    case ActiveGraph::DBType.name
+    when :neo4j
+
+      def create_query
+        return match_query if graph_object.persisted?
+        labels = graph_object.labels_for_create.map { |l| ":`#{l}`" }.join
+        base_query
+          .create("(#{identifier}#{labels} $#{identifier}_params)")
+          .params(identifier_params => graph_object.props_for_create)
+      end
+
+    when :memgraph
+
+      def quote_value(value)
+        case value
+        when String
+          %Q|"#{value.gsub(/"/, '\"')}"|
+        when Integer, Float
+          value
+        end
+      end
+
+      def create_query
+        return match_query if graph_object.persisted?
+        composite_label =
+          graph_object
+            .labels_for_create
+            .map { |label| "`#{label}`" }
+            .join(':')
+        assign =
+          graph_object
+            .props_for_create
+            .map { |key, value| %Q|#{key}: #{quote_value(value)}| }
+            .join(', ')
+        base_query.create("(#{identifier}:#{composite_label} {#{assign}})")
+      end
     end
   end
 
@@ -84,7 +117,9 @@ module ActiveGraph::Shared
     def create_query
       return match_query if graph_object.persisted?
       create_props, set_props = filtered_props
-      base_query.send(graph_object.create_method, query_string(create_props)).break
+      base_query
+        .send(graph_object.create_method, query_string(create_props))
+        .break
         .set(identifier => set_props)
         .params(params(create_props))
     end
@@ -107,8 +142,27 @@ module ActiveGraph::Shared
       graph_object.create_method == :create_unique
     end
 
-    def pattern(create_props)
-      unique? ? "{#{create_props.keys.map { |key| "#{key}: $#{scoped(key)}" }.join(', ')}}" : "$#{namespace}"
+    case ActiveGraph::DBType.name
+    when :neo4j
+
+      def pattern(create_props)
+        if unique? then
+          assign = create_props.keys.map { |key| "#{key}: $#{scoped(key)}" }.join(', ')
+          "{#{assign}}"
+        else
+          "$#{namespace}"
+        end
+      end
+
+    when :memgraph
+
+      # FIXME - I don't think this is right, but need an error test-case
+
+      def pattern(create_props)
+        assign = create_props.keys.map { |key| "#{key}: $#{scoped(key)}" }.join(', ')
+        "{#{assign}}"
+      end
+
     end
 
     def scoped(key)

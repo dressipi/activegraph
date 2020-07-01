@@ -65,9 +65,40 @@ module ActiveGraph::Node
     # @param [Hash] node_props The type-converted properties to be added to the new node.
     # @param [Array] labels The labels to use for creating the new node.
     # @return [ActiveGraph::Node] A CypherNode or EmbeddedNode
-    def _create_node(node_props, labels = labels_for_create)
-      query = "CREATE (n:`#{Array(labels).join('`:`')}`) SET n = $props RETURN n"
-      neo4j_query(query, {props: node_props}, wrap: false).to_a[0][:n]
+
+    case ActiveGraph::DBType.name
+    when :neo4j
+      def _create_node(node_props, labels = labels_for_create)
+        query = "CREATE (n:`#{Array(labels).join('`:`')}`) SET n = $props RETURN n"
+        neo4j_query(query, {props: node_props}, wrap: false).to_a[0][:n]
+      end
+    when :memgraph
+
+      # Memgraph does not support assinging node properties to paramaters,
+      # so we need to unroll that assignment manually, one tricky bit is that
+      # we need to quote strings and escape quotation marks in them
+
+      def quote_value(value)
+        case value
+        when String
+          %Q|"#{value.gsub(/"/, '\"')}"|
+        when Integer, Float
+          value
+        end
+      end
+
+      def _create_node(node_props, labels = labels_for_create)
+        composite_label =
+          Array(labels)
+            .map { |label| "`#{label}`" }
+            .join(':')
+        assign =
+          node_props
+            .map { |key, value| %Q|#{key}: #{quote_value(value)}| }
+            .join(', ')
+        query = "CREATE (n:#{composite_label} {#{assign}}) RETURN n"
+        neo4j_query(query, {}, wrap: false).to_a[0][:n]
+      end
     end
 
     # As the name suggests, this inserts the primary key (id property) into the properties hash.

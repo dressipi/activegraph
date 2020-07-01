@@ -11,8 +11,8 @@ to run.  As of 1 July, 2020
     GRAPH_DB=memgraph NEO4J_URL=bolt://localhost:7687 \
         bundle exec rake spec
       :
-    Finished in 50.22 seconds (files took 1.41 seconds to load)
-    1907 examples, 405 failures, 9 pending
+    Finished in 1 minute 21.06 seconds (files took 1.41 seconds to load)
+    1907 examples, 212 failures, 9 pending
 
 Most of the core tests pass, but there are some wrinkles with
 transactions, and differences in the way constraints are handled.
