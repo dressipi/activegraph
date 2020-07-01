@@ -3,24 +3,50 @@ module ActiveGraph
     module Schema
       module Memgraph
 
+        # this is not, of course, the version of Memgraph, but for now
+        # we will code to make Memgraph appear like Neo4j v4
+
+        def version
+          '4.0'
+        end
+
+        # at present, this contains only the indexes proper (which seems
+        # sesnible), but the Neo4j method also includes the constraints,
+        # not quite sure what the thinking there is ...
+
         def indexes
-          result = list_indexes_query
-          result.map do |row|
+          list_indexes_query.map do |row|
             {
               type: row[:'index type'].to_sym,
               label: row[:label].to_sym,
               properties: [row[:property].to_sym],
-              state: nil
+            }
+          end
+        end
+
+        def constraints
+          list_constraints_query.map do |row|
+            {
+              type: :uniqueness,
+              label: row[:label].to_sym,
+              properties: [row[:properties].to_sym]
             }
           end
         end
 
         private
 
-        def list_indexes_cypher
-          'SHOW INDEX INFO'
+        def query_uninstrumented(cypher)
+          query(cypher, {}, skip_instrumentation: true)
         end
 
+        def list_indexes_query
+          query_uninstrumented('SHOW INDEX INFO')
+        end
+
+        def list_constraints_query
+          query_uninstrumented('SHOW CONSTRAINT INFO')
+        end
       end
     end
   end

@@ -6,39 +6,35 @@ the wonderful ActiveGraph ORM to support Memgraph (as well as Neo4j).
 To this end I have added a _temporary_ module `ActiveGraph::DBType`
 which selects which DB is the target from the environment variable
 `GRAPH_DB`, and made some initial modifications to allow the specs
-to run.  As of 26 June, 2020
+to run.  As of 1 July, 2020
 
-    $ GRAPH_DB=memgraph \
-        NEO4J_URL=bolt://localhost:7687 \
-        bundle exec rspec -c -fd spec/active_graph/base_spec.rb
+    GRAPH_DB=memgraph NEO4J_URL=bolt://localhost:7687 \
+        bundle exec rake spec
+      :
+    Finished in 50.22 seconds (files took 1.41 seconds to load)
+    1907 examples, 408 failures, 9 pending
 
-    ActiveGraph::Base
-      #query
-        Can make a query
-        can make a query with a large payload
-        :
+Most of the core tests pass, but there are some wrinkles with
+transactions, and differences in the way constraints are handled.
 
-    Finished in 0.34751 seconds (files took 0.66807 seconds to load)
-    68 examples, 6 failures
+Main errors in failing specs
 
+- `Not yet implemented: property parameters` (95% of errors)
 
-and some of these errors are expectations on error messages, so
-trivally fixable.  So feasibility looks likely.
+- `Function 'EXISTS' doesn't exist` which makes me laugh
 
+Looks increasingly feasible.
 
 Design
 ------
-
-Switching on a type is a classic OO antipattern, and I'd not offer
-such as a PR to the ActiveGraph project.  But it is at least quick
-and fairly non-invasive.
 
 From initial investigations, it seems like there are some parts
 of the code where the Memgraph and Neo4j code would be very different
 while for most of it only trivial changes would be needed.  From
 this, I think a better design would be to have those divergent
 classes subclassed, then have a generic mechanism to route to
-the appropriate subclass by type.  But I'm open to ideas on this.
+the appropriate subclass by type.  I've a hacky mechanism in-place
+but I'm not terribly happy with it, my metaprogramming-foo is weak.
 
 
 Running
