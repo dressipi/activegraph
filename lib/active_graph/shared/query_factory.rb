@@ -87,6 +87,12 @@ module ActiveGraph::Shared
           %Q|"#{value.gsub(/"/, '\"')}"|
         when Integer, Float
           value
+        when TrueClass
+          'true'
+        when FalseClass
+          'false'
+        else
+          raise RuntimeError, value.class
         end
       end
 

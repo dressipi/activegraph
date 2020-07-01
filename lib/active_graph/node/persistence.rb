@@ -67,11 +67,14 @@ module ActiveGraph::Node
     # @return [ActiveGraph::Node] A CypherNode or EmbeddedNode
 
     case ActiveGraph::DBType.name
+
     when :neo4j
+
       def _create_node(node_props, labels = labels_for_create)
         query = "CREATE (n:`#{Array(labels).join('`:`')}`) SET n = $props RETURN n"
         neo4j_query(query, {props: node_props}, wrap: false).to_a[0][:n]
       end
+
     when :memgraph
 
       # Memgraph does not support assinging node properties to paramaters,
@@ -84,6 +87,12 @@ module ActiveGraph::Node
           %Q|"#{value.gsub(/"/, '\"')}"|
         when Integer, Float
           value
+        when TrueClass
+          'true'
+        when FalseClass
+          'false'
+        else
+          raise RuntimeError, value.class
         end
       end
 

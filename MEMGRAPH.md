@@ -11,18 +11,8 @@ to run.  As of 1 July, 2020
     GRAPH_DB=memgraph NEO4J_URL=bolt://localhost:7687 \
         bundle exec rake spec
       :
-    Finished in 1 minute 21.06 seconds (files took 1.41 seconds to load)
-    1907 examples, 212 failures, 9 pending
-
-Most of the core tests pass, but there are some wrinkles with
-transactions, and differences in the way constraints are handled.
-
-Main errors in failing specs
-
-- `Not yet implemented: property parameters` (95% of errors)
-- `Function 'EXISTS' doesn't exist` which makes me laugh, but
-  should be easy to fix with `IS NOT NULL`
-- `extraneous input 'FOREACH'`, an unsupported fucntion
+    Finished in 1 minute 31.93 seconds (files took 1.37 seconds to load)
+    1907 examples, 51 failures, 9 pending
 
 Looks increasingly feasible.
 
