@@ -56,8 +56,8 @@ Include in your ``Gemfile``:
 .. code-block:: ruby
 
   # for rubygems
-  gem 'activegraph', '>= 10.0.0' # For example, see https://rubygems.org/gems/activegraph/versions for the latest versions
-  gem 'neo4j-ruby-driver'
+  gem 'activegraph', '~> 10.0.0' # For example, see https://rubygems.org/gems/activegraph/versions for the latest versions
+  gem 'neo4j-ruby-driver', '~> 1.7.0'
 
 In ``application.rb``:
 
@@ -123,7 +123,14 @@ Neo4j requires authentication by default but if you install using the built-in :
 
   config.neo4j.driver.url = 'neo4j://localhost:7687'
   config.neo4j.driver.username = 'neo4j'
-  config.neo4j.driver.username = 'password'
+  config.neo4j.driver.password = 'password'
+
+In Neo4j 4.x encryption is not configured by default, while neo4j-ruby-driver 1.7 by default requests encrypted connection. To make both work together either setup SSL on the neo4j server or disable encryption in the driver:
+
+.. code-block:: ruby
+
+  config.neo4j.driver.encryption = false
+
 
 Any Ruby Project
 ~~~~~~~~~~~~~~~~
